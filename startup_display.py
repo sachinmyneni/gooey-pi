@@ -9,9 +9,8 @@ from papirus import Papirus
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
-from time import sleep
 import RPi.GPIO as GPIO
-from datetime import datetime
+import gps_locate as gl
 
 # Check EPD_SIZE is defined
 EPD_SIZE=0.0
@@ -80,34 +79,8 @@ def main(argv):
 
     papirus.clear()
 
-    write_text(papirus, "Ready... SW1 + SW2 to exit.", SIZE)
-
-    while True:
-        # Exit when SW1 and SW2 are pressed simultaneously
-        if (GPIO.input(SW1) == False) and (GPIO.input(SW2) == False) :
-            write_text(papirus, "Exiting ...", SIZE)
-            sleep(0.2)
-            papirus.clear()
-            sys.exit()
-
-        if GPIO.input(SW1) == False:
-            write_text(papirus, "One", SIZE)
-
-        if GPIO.input(SW2) == False:
-            write_text(papirus, "Two", SIZE)
-
-        if GPIO.input(SW3) == False:
-            write_text(papirus, "Three", SIZE)
-
-        if GPIO.input(SW4) == False:
-            write_text(papirus, "Rebooting...", SIZE)
-            os.system("sudo reboot") 
-
-        if (SW5 != -1) and (GPIO.input(SW5) == False):
-            write_text(papirus, "Shutting Down at\n" + str(datetime.now()), SIZE)
-            os.system("sudo shutdown now -h") 
- 
-        sleep(0.1)
+    loc_time = gl.get_loc_time()
+    write_text(papirus, "Booted up at: \n" + str(loc_time['Lat']) + " " + str(loc_time['Lon']) + "\n" + "Time: " + loc_time['Time'], SIZE)
 
 def write_text(papirus, text, size):
 
