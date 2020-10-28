@@ -75,12 +75,12 @@ def main(argv):
 
     # Use smaller font for smaller displays
     if papirus.height <= 96:
-        SIZE = 18
+        SIZE = 12
 
     papirus.clear()
 
     loc_time = gl.get_loc_time()
-    write_text(papirus, "Booted up at: \n" + str(loc_time['Lat']) + " " + str(loc_time['Lon']) + "\n" + "Time: " + loc_time['Time'], SIZE)
+    write_text(papirus, "Booted up at: \nLat: " + str(loc_time['Lat']) + "\nLon: " + str(loc_time['Lon']) + "\nTime: " + loc_time['Time'], SIZE)
 
 def write_text(papirus, text, size):
 
