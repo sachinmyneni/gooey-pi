@@ -78,7 +78,7 @@ def main(argv):
     # and remains the same for the rest of the duration of the program. If the program
     # is restarted the location file's name changes.
 
-    location_file = '/home/pi/location'+timestamp+'.txt'
+    location_file = '/home/pi/location'+datetime.now().strftime('%Y%m%d%H%M%S')+'.txt'
 
     # Use smaller font for smaller displays
     if papirus.height <= 96:
@@ -105,8 +105,9 @@ def main(argv):
         if GPIO.input(SW3) == False:
             write_text(papirus, "Track Motion", SIZE)
             lt = gl.get_loc_time()
+            write_text(papirus,str(lt['Alt'])+","+str(lt['Lat'])+","+str(lt['Lon'])+","+str(lt['Time']), SIZE)
             with open(location_file,'a+') as lf:
-                lf.write(lt['Alt']+","+lt['Lat']+","+lt['Lon']+","+lt['Time']+"\n") 
+                lf.write(str(lt['Alt'])+","+str(lt['Lat'])+","+str(lt['Lon'])+","+str(lt['Time'])+"\n") 
         if GPIO.input(SW4) == False:
             write_text(papirus, "Rebooting...", SIZE)
             os.system("sudo reboot") 
