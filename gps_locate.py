@@ -3,9 +3,6 @@
 
 from gps3 import agps3
 from time import sleep
-import datetime as dt
-import pytz
-from tzwhere import tzwhere
 import logging
 
 def get_loc_time():
@@ -17,19 +14,16 @@ def get_loc_time():
         if new_data:
             data_stream.unpack(new_data)
             if data_stream.alt != 'n/a':
-                logging.debug('Altitude = ', data_stream.alt)
-                logging.debug('Latitude = ', data_stream.lat)
-                logging.debug('Longitude = ', data_stream.lon)
-                logging.debug('Time (UTC) = ', data_stream.time)
-                tzhere = tzwhere.tzwhere()
-                timezone_str = tzhere.tzNameAt(data_stream.lat, data_stream.lon)
-                print(timezone_str)
+                logging.debug(f"Altitude = {data_stream.alt}")
+                logging.debug(f"Latitude = {data_stream.lat}")
+                logging.debug(f"Longitude = {data_stream.lon}")
+                logging.debug(f"Time (UTC) = {data_stream.time}")
                 return({'Alt':data_stream.alt,'Lat':data_stream.lat,'Lon':data_stream.lon,'Time':data_stream.time})
             else:
                 sleep(1)
 
 if __name__ == "__main__":
 
-    DEFAULT_LOG_LEVEL=logging.WARNING 
+    DEFAULT_LOG_LEVEL=logging.WARNING
     logging.basicConfig(level=DEFAULT_LOG_LEVEL,format='[{asctime}:{filename}:{lineno}] {msg}',style="{")
     get_loc_time()
