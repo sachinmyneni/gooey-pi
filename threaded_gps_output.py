@@ -32,6 +32,7 @@ if __name__ == '__main__':
       #It may take a second or two to get good data
       #print gpsd.fix.latitude,', ',gpsd.fix.longitude,'  Time: ',gpsd.utc
 
+      # clear screen
       os.system('clear')
 
       print
