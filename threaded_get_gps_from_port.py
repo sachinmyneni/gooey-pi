@@ -31,11 +31,12 @@ class GpsPoller(threading.Thread):
            except KeyError:
                pass
            except KeyboardInterrupt:
+               session = None
                quit()
            except StopIteration:
                session = None
                print("GPSD has terminated")
-       time.sleep(1) # tune this, you might not get values that quickly
+       time.sleep(1) # GPS Dongle max update frequency is 1 sec
 
 if __name__ == '__main__':
 
@@ -43,7 +44,6 @@ if __name__ == '__main__':
    gpsp = GpsPoller()
    gpsp.start()
    gps_attribs = ['time','alt','lon','lat']
-   # gpsp now polls every .2 seconds for new data, storing it in self.current_value
    while True:
        try:
            with open(location_file,'a+') as lf:
