@@ -9,10 +9,34 @@ from papirus import Papirus
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
-import RPi.GPIO as GPIO
-import gps_locate as gl
 from time import sleep
+import RPi.GPIO as GPIO
 from datetime import datetime
+import threaded_get_gps_from_port as tggp
+import threading
+
+def collect_gps(papirus,SIZE):
+    # thread to open a new file, start writing and spawn the
+    # other thread to collect gps data from the port.
+    # Start tracking.
+    write_text(papirus, "Beginning tracking...", SIZE)
+    location_file = '/home/pi/location'+datetime.now().strftime('%Y%m%d%H%M%S')+'.txt'
+    gpsp = tggp.GpsPoller()
+    gpsp.start()
+    gps_attribs = ['time','alt','lon','lat']
+    while True:
+        try:
+            with open(location_file,'a+') as lf:
+                result = gpsp.get_current_value()
+                if all(getattr(result,attr) for attr in gps_attribs):
+                    lf.write(str(result.alt)+","+str(result.lat)+","+str(result.lon)+","+str(result.time)+"\n") 
+                    # In the main thread, every 5 seconds print the current value
+                    sleep(5)
+        except AttributeError:
+             sleep(2)
+        except KeyboardInterrupt:
+             quit()
+
 
 # Check EPD_SIZE is defined
 EPD_SIZE=0.0
@@ -81,8 +105,43 @@ def main(argv):
 
     papirus.clear()
 
-    loc_time = gl.get_loc_time()
-    write_text(papirus, "Booted up at: \nLat: " + str(loc_time['Lat']) + "\nLon: " + str(loc_time['Lon']) + "\nTime: " + loc_time['Time'], SIZE)
+    write_text(papirus, "Ready... 1 + 2 to exit.\n1 to start GPS\n2 to stop GPS\n4 to restart\n5 to shutdown", SIZE)
+    TRACKING = False
+    while True:
+        # Exit when SW1 and SW2 are pressed simultaneously
+        if (GPIO.input(SW1) == False) and (GPIO.input(SW2) == False) :
+            write_text(papirus, "Exiting ...", SIZE)
+            sleep(0.2)
+            papirus.clear()
+            sys.exit()
+
+        if GPIO.input(SW1) == False:
+            if TRACKING:
+                 write_text(papirus, "GPS already logging.\nPress 2 to stop", SIZE)
+            else:
+                 # Start tracking
+                 g = threading.Thread(target=collect_gps,args=(papirus,SIZE,),daemon=True)
+                 g.start() 
+                 TRACKING = True
+        if GPIO.input(SW2) == False:
+            if TRACKING:
+                 # Stop tracking
+                 g.join() 
+                 write_text(papirus, "Tracking ended.", SIZE)
+            else:
+                 write_text(papirus, "No current GPS logging.\nPress 1 to start", SIZE)
+        if GPIO.input(SW3) == False:
+            write_text(papirus, "Three", SIZE)
+
+        if GPIO.input(SW4) == False:
+            write_text(papirus, "Rebooting...", SIZE)
+            os.system("sudo reboot") 
+
+        if (SW5 != -1) and (GPIO.input(SW5) == False):
+            write_text(papirus, "Shutting Down at\n" + str(datetime.now()), SIZE)
+            os.system("sudo shutdown now -h") 
+ 
+        sleep(0.1)
 
 def write_text(papirus, text, size):
 
