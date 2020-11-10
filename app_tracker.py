@@ -127,6 +127,7 @@ def main(argv):
             if TRACKING:
                  # Stop tracking
                  g.join() 
+                 TRACKING = False
                  write_text(papirus, "Tracking ended.", SIZE)
             else:
                  write_text(papirus, "No current GPS logging.\nPress 1 to start", SIZE)
